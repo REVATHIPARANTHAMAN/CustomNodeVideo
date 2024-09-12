@@ -1,11 +1,14 @@
 const express = require("express");
 const http = require("http");
 const fs = require('fs');
+const util = require('util');
 const logger = require('./public/utils/logger.cjs');
 const ftpClient = require('./public/utils/ftputil.cjs');
 const constants = require('./public/utils/constant.json');
 const fsProm = require("fs/promises");
-const { authentication } = require("./authentication");
+
+//const DEFAULT_LOG = '/app/serverlogs/serverlog.txt';
+//const { authentication } = require("./authentication");
 
 const DEFAULT_PORT = 8080;
 const PORT = process.env.PORT || DEFAULT_PORT;
