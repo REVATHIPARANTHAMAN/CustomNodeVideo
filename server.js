@@ -169,7 +169,6 @@ io.on("connection", (socket) => {
 
 const hashMapUniqueId = new Map();
 hashMapUniqueId.set('uniqueId', uniqueId);
-
 console.log(hashMapUniqueId); 
   
   if (connection_type.includes("customer")) {
