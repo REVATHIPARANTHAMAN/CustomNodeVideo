@@ -1,23 +1,20 @@
 const express = require("express");
 const http = require("http");
 const fs = require('fs');
-const util = require('util');
 const logger = require('./public/utils/logger.cjs');
 const ftpClient = require('./public/utils/ftputil.cjs');
 const constants = require('./public/utils/constant.json');
-const DEFAULT_PORT = 8080;
-let baseUrl = "";
-//const DEFAULT_LOG = '/app/serverlogs/serverlog.txt';
 const fsProm = require("fs/promises");
+const { authentication } = require("./authentication");
 
+const DEFAULT_PORT = 8080;
 const PORT = process.env.PORT || DEFAULT_PORT;
-//const LOG =  process.env.LOG || DEFAULT_LOG;
 
 const app = express();
 const server = http.createServer(app);
 const io = require("socket.io")(server);
-//onst logFile = fs.createWriteStream(LOG, { flags: 'a' });
-//const logStdout = process.stdout;
+
+let baseUrl = "";
 
 app.use(express.static("public"));
 
@@ -29,15 +26,24 @@ app.get("/customer", (req, res) => {
   res.sendFile(__dirname + "/public/customer.html");
 });
 
+app.get("/customerIos", (req, res) => {
+  res.sendFile(__dirname + "/public/customerIos.html");
+});
+
 app.get("/userDisconnected", (req, res) => {
   res.sendFile(__dirname + "/public/userDisconnected.html");
 });
 
-app.get("/agent", (req, res) => {
+// app.get("/agent", authentication.authen,(req, res) => {
+app.get("/agent",(req, res) => {
   logger().info("agent window loaded..");
   baseUrl = req.headers.host; 
-  res.sendFile(__dirname + "/public/agent.html");
+  const uniqueId = req.query.name;
+  //console.log("uniqueId" + baseUrl);
+  res.sendFile(__dirname + "/public/agent.html",uniqueId);
 });
+
+
 
 app.get("/disconnect", (req, res) => {
   io.disconnectSockets();
@@ -146,12 +152,26 @@ app.get("/connected_users", (req, res) => {
 let connectedPeers = [];
 const hashMap = new Map();
 const hashMapUser = new Map();
+const hashMapAvailableUser = new Map();
 
 let user = "", connectedUser = [];
 io.on("connection", (socket) => {
-
+  console.log("socket info" + socket);
+  console.log("socket id");
+  console.log(socket.id);
   let connection_type = socket.handshake.headers.referer;
+  console.log("connection_type info" + connection_type);
+  //let URLParams = new URLSearchParams(window.location.search);
+ // console.log("URLParams" + URLParams);
+ const parsedUrl = new URL(connection_type);
+ const uniqueId = parsedUrl.searchParams.get('uniqueId');
+ console.log(uniqueId);
 
+const hashMapUniqueId = new Map();
+hashMapUniqueId.set('uniqueId', uniqueId);
+
+console.log(hashMapUniqueId); 
+  
   if (connection_type.includes("customer")) {
     connection_type = "customer";
   } else {
@@ -178,6 +198,7 @@ io.on("connection", (socket) => {
 
   hashMap.set(socket.id, user.user);
   hashMapUser.set(user.user, user.connection_id);
+  hashMapAvailableUser.set(user.user, user.connection_id);
   socket.emit('emitUser', {
     id: user
   });
@@ -253,19 +274,8 @@ io.on("connection", (socket) => {
     hashMap.delete(socket.id);
     connectedUser = connectedUser.filter((user) => user.user !== userDelete);
   });
-
-
-});
-
-io.on("reconnect", (attempt) => {
-  console.log("reconnecting.....");
 });
 
 server.listen(PORT, () => {
   console.log(`listening on ${PORT}`);
 });
-
-/*console.log = function () {
-  logFile.write(util.format.apply(null, arguments) + '\n');
-  logStdout.write(util.format.apply(null, arguments) + '\n');
-};*/
