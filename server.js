@@ -172,8 +172,22 @@ io.on("connection", (socket) => {
 
 const hashMapUniqueId = new Map();
 hashMapUniqueId.set('uniqueId', uniqueId);
-console.log(hashMapUniqueId); 
-  
+
+
+//console.log(hashMapUniqueId); 
+//const hashMapUniqueIdArray = Array.from(hashMapUniqueId.values());
+//console.log(hashMapUniqueIdArray); 
+//let counter = 1;
+//const exists = hashMapUniqueIdArray.some(item => item.value === uniqueId);
+//if (!exists) {
+  // If not, store it with a unique key
+ // hashMapUniqueIdArray.push({ key: `id_${counter}`, value: uniqueId });
+ //counter++; // Increment the counter for the next key
+//}
+//console.log(hashMapUniqueIdArray);
+
+
+
   if (connection_type.includes("customer")) {
     connection_type = "customer";
   } else {
@@ -201,6 +215,34 @@ console.log(hashMapUniqueId);
   hashMap.set(socket.id, user.user);
   hashMapUser.set(user.user, user.connection_id);
   hashMapAvailableUser.set(user.user, user.connection_id);
+  console.log("hashMapAvailableUser");
+  console.log(hashMapAvailableUser); 
+ 
+const combinedMap = new Map();
+for (const [key, value] of hashMapAvailableUser) {
+  combinedMap.set(key, value);
+}
+for (const [key, value] of hashMapUniqueId) {
+  combinedMap.set(key, value);
+}
+//console.log(combinedMap);
+const usersByUniqueId = new Map();
+
+if (usersByUniqueId.has(uniqueId)) {
+  // If it exists, get the array of users and add the new userId
+  const usersArray = usersByUniqueId.get(uniqueId);
+  if (!usersArray.includes(user)) {
+    usersArray.push(user);
+  }
+  console.log("usersArray");
+console.log(usersArray);
+} else {
+  // If it does not exist, create a new array with the userId and add it to the Map
+  usersByUniqueId.set(uniqueId, [user]);
+}
+console.log ("usersByUniqueId");
+console.log(usersByUniqueId);
+
   socket.emit('emitUser', {
     id: user
   });
@@ -276,7 +318,11 @@ console.log(hashMapUniqueId);
     hashMap.delete(socket.id);
     connectedUser = connectedUser.filter((user) => user.user !== userDelete);
   });
+  socket.on("reconnect", () => {
+console.log("reconnect");
+  });
 });
+
 
 server.listen(PORT, () => {
   console.log(`listening on ${PORT}`);
