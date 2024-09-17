@@ -156,6 +156,7 @@ let connectedPeers = [];
 const hashMap = new Map();
 const hashMapUser = new Map();
 const hashMapAvailableUser = new Map();
+const hashMapUserbyUniqueId = new Map();
 
 let user = "", connectedUser = [];
 io.on("connection", (socket) => {
@@ -164,8 +165,7 @@ io.on("connection", (socket) => {
   console.log(socket.id);
   let connection_type = socket.handshake.headers.referer;
   console.log("connection_type info" + connection_type);
-  //let URLParams = new URLSearchParams(window.location.search);
- // console.log("URLParams" + URLParams);
+
  const parsedUrl = new URL(connection_type);
  const uniqueId = parsedUrl.searchParams.get('uniqueId');
  console.log(uniqueId);
@@ -173,18 +173,6 @@ io.on("connection", (socket) => {
 const hashMapUniqueId = new Map();
 hashMapUniqueId.set('uniqueId', uniqueId);
 
-
-//console.log(hashMapUniqueId); 
-//const hashMapUniqueIdArray = Array.from(hashMapUniqueId.values());
-//console.log(hashMapUniqueIdArray); 
-//let counter = 1;
-//const exists = hashMapUniqueIdArray.some(item => item.value === uniqueId);
-//if (!exists) {
-  // If not, store it with a unique key
- // hashMapUniqueIdArray.push({ key: `id_${counter}`, value: uniqueId });
- //counter++; // Increment the counter for the next key
-//}
-//console.log(hashMapUniqueIdArray);
 
 
 
@@ -194,8 +182,19 @@ hashMapUniqueId.set('uniqueId', uniqueId);
     connection_type = "agent";
   }
   if (connectedUser.length !== 0) {
+
+   
+   var tempUser = `user_${parseInt(connectedUser[connectedUser.length - 1].user.split("_")[1]) + 1}`;
+   if(hashMapUserbyUniqueId.has(uniqueId)){
+    console.log("------------------------test------------------------------------");
+console.log( hashMapUserbyUniqueId.get(uniqueId));
+console.log("------------------------hashMapUserbyUniqueId------------------------------------");
+console.log( hashMapUserbyUniqueId.get(uniqueId).user);
+      tempUser = hashMapUserbyUniqueId.get(uniqueId).user;
+   }
+   
     user = {
-      "user": `user_${parseInt(connectedUser[connectedUser.length - 1].user.split("_")[1]) + 1}`,
+      "user": tempUser,
       "connection_id": socket.id,
       "connection_status": 1,
       "connected_user": null,
@@ -217,7 +216,9 @@ hashMapUniqueId.set('uniqueId', uniqueId);
   hashMapAvailableUser.set(user.user, user.connection_id);
   console.log("hashMapAvailableUser");
   console.log(hashMapAvailableUser); 
- 
+  hashMapUserbyUniqueId.set(uniqueId ,user);
+  console.log("hashMapUserbyUniqueId"); // step1
+  console.log(hashMapUserbyUniqueId);
 const combinedMap = new Map();
 for (const [key, value] of hashMapAvailableUser) {
   combinedMap.set(key, value);
@@ -225,23 +226,8 @@ for (const [key, value] of hashMapAvailableUser) {
 for (const [key, value] of hashMapUniqueId) {
   combinedMap.set(key, value);
 }
-//console.log(combinedMap);
-const usersByUniqueId = new Map();
 
-if (usersByUniqueId.has(uniqueId)) {
-  // If it exists, get the array of users and add the new userId
-  const usersArray = usersByUniqueId.get(uniqueId);
-  if (!usersArray.includes(user)) {
-    usersArray.push(user);
-  }
-  console.log("usersArray");
-console.log(usersArray);
-} else {
-  // If it does not exist, create a new array with the userId and add it to the Map
-  usersByUniqueId.set(uniqueId, [user]);
-}
-console.log ("usersByUniqueId");
-console.log(usersByUniqueId);
+
 
   socket.emit('emitUser', {
     id: user
