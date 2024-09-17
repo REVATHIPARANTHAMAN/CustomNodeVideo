@@ -185,18 +185,21 @@ hashMapUniqueId.set('uniqueId', uniqueId);
 
    
    var tempUser = `user_${parseInt(connectedUser[connectedUser.length - 1].user.split("_")[1]) + 1}`;
+   var connStatus = "";
    if(hashMapUserbyUniqueId.has(uniqueId)){
     console.log("------------------------test------------------------------------");
 console.log( hashMapUserbyUniqueId.get(uniqueId));
 console.log("------------------------hashMapUserbyUniqueId------------------------------------");
 console.log( hashMapUserbyUniqueId.get(uniqueId).user);
       tempUser = hashMapUserbyUniqueId.get(uniqueId).user;
+      console.log("------------------------connection_status------------------------------------"); 
+      connStatus = hashMapUserbyUniqueId.get(uniqueId).connection_status;
    }
    
     user = {
       "user": tempUser,
       "connection_id": socket.id,
-      "connection_status": 1,
+      "connection_status": connStatus,
       "connected_user": null,
       "connection_type": connection_type
     };
