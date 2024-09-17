@@ -194,6 +194,7 @@ console.log( hashMapUserbyUniqueId.get(uniqueId).user);
       tempUser = hashMapUserbyUniqueId.get(uniqueId).user;
       console.log("------------------------connection_status------------------------------------"); 
       connStatus = hashMapUserbyUniqueId.get(uniqueId).connection_status;
+      console.log("------------------------connection_status------------------------------------" +connStatus); 
    }
    
     user = {
