@@ -157,8 +157,10 @@ const hashMap = new Map();
 const hashMapUser = new Map();
 const hashMapAvailableUser = new Map();
 const hashMapUserbyUniqueId = new Map();
+const hashMapupdateconnectedstatus = new Map();
+let updateconnectedstatus = "";
 
-let user = "", connectedUser = [];
+let user = "", arrayFromMap = [],connectedUser = [];
 io.on("connection", (socket) => {
   console.log("socket info" + socket);
   console.log("socket id");
@@ -185,7 +187,7 @@ hashMapUniqueId.set('uniqueId', uniqueId);
 
    
    var tempUser = `user_${parseInt(connectedUser[connectedUser.length - 1].user.split("_")[1]) + 1}`;
-   var connStatus = "";
+   var connStatus = 1;
    if(hashMapUserbyUniqueId.has(uniqueId)){
     console.log("------------------------test------------------------------------");
 console.log( hashMapUserbyUniqueId.get(uniqueId));
@@ -193,14 +195,21 @@ console.log("------------------------hashMapUserbyUniqueId----------------------
 console.log( hashMapUserbyUniqueId.get(uniqueId).user);
       tempUser = hashMapUserbyUniqueId.get(uniqueId).user;
       console.log("------------------------connection_status------------------------------------"); 
-      connStatus = hashMapUserbyUniqueId.get(uniqueId).connection_status;
-      console.log("------------------------connection_status------------------------------------" +connStatus); 
+     // connStatus = hashMapUserbyUniqueId.get(uniqueId).connection_status;
+     var connStatususer = hashMapupdateconnectedstatus.get(tempUser.user);
+     if(connStatususer != undefined){
+     connStatus =  connStatususer.connection_status;
+     }
+
+      console.log(connStatususer); 
+
    }
    
     user = {
       "user": tempUser,
       "connection_id": socket.id,
-      "connection_status": connStatus,
+      //"connection_status": 1,
+     "connection_status": connStatus,
       "connected_user": null,
       "connection_type": connection_type
     };
@@ -214,15 +223,21 @@ console.log( hashMapUserbyUniqueId.get(uniqueId).user);
     };
   }
   connectedUser.push(user);
-
+  console.log("connectedUser"); 
+  console.log(connectedUser);
   hashMap.set(socket.id, user.user);
   hashMapUser.set(user.user, user.connection_id);
+  console.log("hashMapUser");
+  console.log(hashMapUser); 
   hashMapAvailableUser.set(user.user, user.connection_id);
   console.log("hashMapAvailableUser");
   console.log(hashMapAvailableUser); 
   hashMapUserbyUniqueId.set(uniqueId ,user);
   console.log("hashMapUserbyUniqueId"); // step1
   console.log(hashMapUserbyUniqueId);
+  hashMapupdateconnectedstatus.set(user.user,user);
+  console.log("hashMapupdateconnectedstatus"); // step2
+  console.log(hashMapupdateconnectedstatus);
 const combinedMap = new Map();
 for (const [key, value] of hashMapAvailableUser) {
   combinedMap.set(key, value);
@@ -291,14 +306,35 @@ for (const [key, value] of hashMapUniqueId) {
   });
 
   socket.on("updateConnectionStatus", (data) => {
+    console.log("updateConnectionStatus");
 
     console.log(data);
     for (let index = 0; index < connectedUser.length; index++) {
       if (connectedUser[index].user === data.username) {
         connectedUser[index].connection_status = (data.status === "connected" ? 2 : 1);
         connectedUser[index].connected_user = data.remoteUser;
+
+
+
+       var updatedUser = hashMapupdateconnectedstatus.get(connectedUser[index].user);
+       if((updatedUser != undefined ) &&(updatedUser != null) ){
+        updatedUser.connection_status =  connectedUser[index].connection_status 
+        hashMapupdateconnectedstatus.set((connectedUser[index].user,updatedUser));
+        console.log("hashMapupdateconnectedstatus after call accepted");
+        console.log(hashMapupdateconnectedstatus);
+        //console.log("user found in hashmap" + connectedUser[index].user);
+       }
+       else{
+        console.log("updatedUser not found in hashmap" + connectedUser[index].user);
+       }
+       
       }
     }
+    //need to update the connection status in hashMapUserbyUniqueId 
+
+   // updateconnectedstatus = (data.status === "connected" ? 2 : 1);
+   // console.log(" connectedUser[index].connection_status");
+   // console.log(updateconnectedstatus);
   });
 
   socket.on("disconnect", () => {
@@ -307,6 +343,9 @@ for (const [key, value] of hashMapUniqueId) {
     hashMapUser.delete(userDelete);
     hashMap.delete(socket.id);
     connectedUser = connectedUser.filter((user) => user.user !== userDelete);
+    arrayFromMap = connectedUser;
+    console.log("arrayFromMap");
+console.log(arrayFromMap);
   });
   socket.on("reconnect", () => {
 console.log("reconnect");

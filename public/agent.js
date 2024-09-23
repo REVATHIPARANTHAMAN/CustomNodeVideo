@@ -4,6 +4,69 @@ import * as store from "./store.js"
 import * as ui from "./uiInteract.js"
 webRTCHandler.getLocalPreview();
 
+
+
+const screenshotButton = document.getElementById("screenshot_button_image");
+screenshotButton.addEventListener('click', () => {
+  const video = document.getElementById('local_video');
+    const canvas = document.getElementById('screenshotCanvas');
+    const img = document.getElementById('screenshot_button_image');
+    const downloadButton = document.getElementById('downloadButton');
+// Set the canvas size to the video size
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    console.log("Set the canvas size to the video size");
+     // Draw the current video frame onto the canvas
+     const context = canvas.getContext('2d');
+     context.drawImage(video, 0, 0, canvas.width, canvas.height);
+     console.log("Draw the current video frame onto the canvas");
+    // Convert the canvas image to a data URL and set it as the src of the img tag
+    const dataURL = canvas.toDataURL('image/png');
+    console.log("screenshotDone");
+    console.log(dataURL);
+   // img.src = dataURL;
+
+ 
+    // Set the download functionality
+
+ // const a = document.createElement('a');
+ // a.href = dataURL;
+ // a.download = `screenshot-${Date.now()}.png`; // File name for download
+  //document.body.appendChild(a);
+  //a.click();
+
+  // to save the captured screenshot in  pictures folder
+  savingscreenshot();
+  async function savingscreenshot() {
+    try {
+      console.log("savingscreenshot1");
+        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+        console.log("savingscreenshot2");
+        // Request the user to choose a directory to save the image
+        const fileHandle = await window.showSaveFilePicker({
+           startIn: 'pictures',
+            suggestedName: `screenshot-${Date.now()}.png`,
+            types: [{
+                description: 'PNG Image',
+                accept: { 'image/png': ['.png'] },
+            }],
+        });
+        console.log("savingscreenshot3");
+        const writableStream = await fileHandle.createWritable();
+        await writableStream.write(blob);
+        await writableStream.close();
+  
+        console.log('Screenshot saved successfully!');
+    } catch (error) {
+        console.error('Error saving the file:', error);
+    }
+  }
+  
+
+});
+
+
+
 const micButton = document.getElementById("mic_button");
 micButton.addEventListener("click", () => {
   const localStream = store.getState().localStream;
@@ -166,7 +229,10 @@ connect_vc.addEventListener("click", () => {
     connect_vc.textContent = "Disconnect VC";
     connect_vc.dataset.status = "connected";
     document.querySelector("#status").textContent = "VC Connected";
-    socket = io("/");
+    socket = io.connect("/" , {
+      query: {
+        manual: true
+      }});
     socketCon.registerSocketEvents(socket);
     session.start();
   } else {
