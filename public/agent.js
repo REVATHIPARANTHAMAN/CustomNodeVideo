@@ -45,13 +45,17 @@ screenshotButton.addEventListener('click', () => {
         // Request the user to choose a directory to save the image
         const fileHandle = await window.showSaveFilePicker({
            startIn: 'pictures',
-            suggestedName: `screenshot-${Date.now()}.png`,
+           // suggestedName: `customNodeApplicationScreenshot-${Date.now()}.png`,
+           suggestedName: `customNodeScreenshot-${getFormattedTimestamp()}.png`,
             types: [{
                 description: 'PNG Image',
                 accept: { 'image/png': ['.png'] },
             }],
         });
+
+      
         console.log("savingscreenshot3");
+       
         const writableStream = await fileHandle.createWritable();
         await writableStream.write(blob);
         await writableStream.close();
@@ -60,6 +64,19 @@ screenshotButton.addEventListener('click', () => {
     } catch (error) {
         console.error('Error saving the file:', error);
     }
+  }
+  function getFormattedTimestamp() {
+    const now = new Date();
+  
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    const milliseconds = String(now.getMilliseconds()).padStart(3, '0');
+  
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds}`;
   }
   
 
