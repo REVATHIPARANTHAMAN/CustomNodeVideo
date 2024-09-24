@@ -2,9 +2,32 @@ import * as webRTCHandler from "./RTCHandlerAgent.js";
 import * as socketCon from "./wssAgent.js";
 import * as store from "./store.js"
 import * as ui from "./uiInteract.js"
+let browserName = "";
+// Function to detect the browser
+function getBrowserName() {
+  const userAgent = navigator.userAgent;
+  
+  if (userAgent.indexOf("Firefox") > -1) {
+      return "Mozilla Firefox";
+  } else if (userAgent.indexOf("Opera") > -1 || userAgent.indexOf("OPR") > -1) {
+      return "Opera";
+  } else if (userAgent.indexOf("Trident") > -1) {
+      return "Microsoft Internet Explorer";
+  } else if (userAgent.indexOf("Edge") > -1) {
+      return "Microsoft Edge";
+  } else if (userAgent.indexOf("Chrome") > -1) {
+      return "Google Chrome";
+  } else if (userAgent.indexOf("Safari") > -1) {
+      return "Safari";
+  } else {
+      return "Unknown browser";
+  }
+}
+
+// Example usage:
+browserName = getBrowserName();
+console.log("Browser: " + browserName);
 webRTCHandler.getLocalPreview();
-
-
 
 const screenshotButton = document.getElementById("screenshot_button_image");
 screenshotButton.addEventListener('click', () => {
@@ -25,19 +48,11 @@ screenshotButton.addEventListener('click', () => {
     console.log("screenshotDone");
     console.log(dataURL);
    // img.src = dataURL;
-
- 
-    // Set the download functionality
-
- // const a = document.createElement('a');
- // a.href = dataURL;
- // a.download = `screenshot-${Date.now()}.png`; // File name for download
-  //document.body.appendChild(a);
-  //a.click();
-
+      
   // to save the captured screenshot in  pictures folder
-  savingscreenshot();
-  async function savingscreenshot() {
+
+    savingscreenshot();
+   async function savingscreenshot() {
     try {
       console.log("savingscreenshot1");
         const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
@@ -51,11 +66,8 @@ screenshotButton.addEventListener('click', () => {
                 description: 'PNG Image',
                 accept: { 'image/png': ['.png'] },
             }],
-        });
-
-      
+        });    
         console.log("savingscreenshot3");
-       
         const writableStream = await fileHandle.createWritable();
         await writableStream.write(blob);
         await writableStream.close();
@@ -65,22 +77,23 @@ screenshotButton.addEventListener('click', () => {
         console.error('Error saving the file:', error);
     }
   }
-  function getFormattedTimestamp() {
-    const now = new Date();
-  
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0'); // Months are 0-based
-    const day = String(now.getDate()).padStart(2, '0');
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-    const seconds = String(now.getSeconds()).padStart(2, '0');
-    const milliseconds = String(now.getMilliseconds()).padStart(3, '0');
-  
-    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds}`;
-  }
-  
+
 
 });
+
+function getFormattedTimestamp() {
+  const now = new Date();
+
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+  const day = String(now.getDate()).padStart(2, '0');
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  const seconds = String(now.getSeconds()).padStart(2, '0');
+  const milliseconds = String(now.getMilliseconds()).padStart(3, '0');
+
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds}`;
+}
 
 
 

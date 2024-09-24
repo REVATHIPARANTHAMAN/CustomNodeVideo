@@ -92,8 +92,10 @@ const createPeerConnection = () => {
       });
       try {
         let hangup = document.getElementById("hang_up_button");
+        //let screenshot = document.getElementById("screenshot_button_image");
         hangup.disabled = false;
         ui.callNFI("onAccept");
+       // screenshot.style.display = "block";
         getFormattedTimestamp();
         console.log("onConferenceStarted timestamp" + getFormattedTimestamp());
         ui.callNFI("onConferenceStarted");
