@@ -3,38 +3,57 @@ import * as socketCon from "./wssAgent.js";
 import * as store from "./store.js"
 import * as ui from "./uiInteract.js"
 webRTCHandler.getLocalPreview();
-
 const screenshotButton = document.getElementById("screenshot_button_image");
 screenshotButton.addEventListener('click', () => {
-  const video = document.getElementById('remote_video');
+  const video = document.getElementById('local_video');
     const canvas = document.getElementById('screenshotCanvas');
     const img = document.getElementById('screenshot_button_image');
     const downloadButton = document.getElementById('downloadButton');
-// Set the canvas size to the video size
+
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
     console.log("Set the canvas size to the video size");
-     // Draw the current video frame onto the canvas
+   
      const context = canvas.getContext('2d');
      context.drawImage(video, 0, 0, canvas.width, canvas.height);
      console.log("Draw the current video frame onto the canvas");
-    // Convert the canvas image to a data URL and set it as the src of the img tag
+  
     const dataURL = canvas.toDataURL('image/png');
     console.log("screenshotDone");
     console.log(dataURL);
-   // img.src = dataURL;
+    window.parent.postMessage('openFilePicker', '*');
+ window.addEventListener('message', async (event) => {
+  if (event.data === 'openFilePicker') {
+      try {
+          // Open the Save File Picker
+          const fileHandle = await window.showSaveFilePicker({
+               startIn: 'pictures',
+               suggestedName: `customNodeScreenshot-${getFormattedTimestamp()}.png`,
+              types: [{
+                  description: 'PNG Image',
+                  accept: {
+                      'image/png': ['.png'],
+                  },
+              }],
+          });
 
- 
-    // Set the download functionality
+          // Write to the file using the file handle
+          const writableStream = await fileHandle.createWritable();
+          
+          // Assuming you have a Blob of the screenshot in the iframe
+          // (for simplicity, we'll assume this message contains the Blob data)
+          const screenshotBlob = new Blob([/* Your screenshot data */], { type: 'image/png' });
 
-  const a = document.createElement('a');
-  a.href = dataURL;
-  a.download = `customscreenshot-${getFormattedTimestamp()}.png`; // File name for download
-  document.body.appendChild(a);
-  a.click();
+          // Write the Blob to the file
+          await writableStream.write(screenshotBlob);
+          await writableStream.close();
 
-  
-  
+          console.log('File saved successfully!');
+      } catch (error) {
+          console.error('Error opening the file picker', error);
+      }
+  }
+
 
 });
 
@@ -51,12 +70,7 @@ function getFormattedTimestamp() {
 
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds}`;
 }
-
-
-
-
-
-
+});
 const micButton = document.getElementById("mic_button");
 micButton.addEventListener("click", () => {
   const localStream = store.getState().localStream;
