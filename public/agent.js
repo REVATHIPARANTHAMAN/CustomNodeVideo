@@ -5,7 +5,7 @@ import * as ui from "./uiInteract.js"
 webRTCHandler.getLocalPreview();
 const screenshotButton = document.getElementById("screenshot_button_image");
 screenshotButton.addEventListener('click', () => {
-  const video = document.getElementById('local_video');
+  const video = document.getElementById('remote_video');
     const canvas = document.getElementById('screenshotCanvas');
     const img = document.getElementById('screenshot_button_image');
     const downloadButton = document.getElementById('downloadButton');
