@@ -23,12 +23,18 @@ screenshotButton.addEventListener('click', () => {
     console.log("screenshotDone");
     console.log(dataURL);
    // img.src = dataURL;
-   const a = document.createElement('a');
-   a.href = dataURL;
-   a.download = `customNode-${getFormattedTimestamp()}.png`; // File name for download
-   document.body.appendChild(a);
-   a.click();
 
+ 
+    // Set the download functionality
+
+  const a = document.createElement('a');
+  a.href = dataURL;
+  a.download = `customscreenshot-${getFormattedTimestamp()}.png`; // File name for download
+  document.body.appendChild(a);
+  a.click();
+
+  
+  
 
 });
 
