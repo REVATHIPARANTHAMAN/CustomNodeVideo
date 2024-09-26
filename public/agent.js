@@ -2,32 +2,40 @@ import * as webRTCHandler from "./RTCHandlerAgent.js";
 import * as socketCon from "./wssAgent.js";
 import * as store from "./store.js"
 import * as ui from "./uiInteract.js"
-let browserName = "";
-// Function to detect the browser
-function getBrowserName() {
-  const userAgent = navigator.userAgent;
-  
-  if (userAgent.indexOf("Firefox") > -1) {
+webRTCHandler.getLocalPreview();
+
+const getBrowserName = (userAgent) => {
+  if (userAgent.includes("firefox")) {
       return "Mozilla Firefox";
-  } else if (userAgent.indexOf("Opera") > -1 || userAgent.indexOf("OPR") > -1) {
+  } else if (userAgent.includes("SamsungBrowser")) {
+      return "Samsung Internet";
+  } else if (userAgent.includes("Opera") || userAgent.includes("OPR")) {
       return "Opera";
-  } else if (userAgent.indexOf("Trident") > -1) {
+  } else if (userAgent.includes("Trident")) {
       return "Microsoft Internet Explorer";
-  } else if (userAgent.indexOf("Edge") > -1) {
+  } else if (userAgent.includes("Edge") || userAgent.includes("Edg")) {
       return "Microsoft Edge";
-  } else if (userAgent.indexOf("Chrome") > -1) {
+  } else if (userAgent.includes("Chrome")) {
       return "Google Chrome";
-  } else if (userAgent.indexOf("Safari") > -1) {
+  } else if (userAgent.includes("Safari")) {
       return "Safari";
   } else {
       return "Unknown browser";
   }
-}
+};
 
-// Example usage:
-browserName = getBrowserName();
-console.log("Browser: " + browserName);
-webRTCHandler.getLocalPreview();
+// Example user-agent string from an incoming HTTP request
+const req = {
+  headers: {
+      'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.121 Safari/537.36'
+  }
+};
+
+const browserName = getBrowserName(req.headers['user-agent']);
+
+console.log('Browser Name:', browserName);
+
+
 
 const screenshotButton = document.getElementById("screenshot_button_image");
 screenshotButton.addEventListener('click', () => {
@@ -48,11 +56,12 @@ screenshotButton.addEventListener('click', () => {
     console.log("screenshotDone");
     console.log(dataURL);
    // img.src = dataURL;
+   
       
   // to save the captured screenshot in  pictures folder
 
-    savingscreenshot();
-   async function savingscreenshot() {
+  savingscreenshot();
+  async function savingscreenshot() {
     try {
       console.log("savingscreenshot1");
         const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
@@ -78,7 +87,6 @@ screenshotButton.addEventListener('click', () => {
     }
   }
 
-
 });
 
 function getFormattedTimestamp() {
@@ -94,6 +102,9 @@ function getFormattedTimestamp() {
 
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds}`;
 }
+
+
+
 
 
 
